@@ -145,9 +145,17 @@ function NumberField({ label, value, onChange, step = 1, suffix }) {
       <div className="flex items-center bg-white border border-stone-200 rounded-lg px-3 py-2 focus-within:border-teal-600 transition-colors">
         <input
           type="number"
-          value={value}
+          value={value === 0 || value ? value : ""}
           step={step}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === "") {
+              onChange("");
+              return;
+            }
+            const parsed = parseFloat(raw);
+            onChange(Number.isNaN(parsed) ? "" : parsed);
+          }}
           className="w-full outline-none text-stone-800 font-medium bg-transparent"
         />
         {suffix && <span className="text-stone-400 text-sm">{suffix}</span>}
