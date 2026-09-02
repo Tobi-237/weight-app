@@ -1,4 +1,5 @@
 // @ts-nocheck
+import OnboardingScreen from "./OnboardingScreen";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
@@ -178,6 +179,10 @@ function SaveIndicator({ status }) {
 export default function App() {
   useGoogleFonts();
 
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => localStorage.getItem("pm_onboarding_done") !== "true"
+  );
+
   const [profileKey, setProfileKey] = useState("pns");
   const [tab, setTab] = useState("resume");
   const [settings, setSettings] = useState(PROFILES.pns.defaults);
@@ -276,13 +281,24 @@ export default function App() {
     { id: "motivation", label: "Motivation", icon: Sparkles },
   ];
 
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen
+        onComplete={() => {
+          localStorage.setItem("pm_onboarding_done", "true");
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div
-      className="min-h-screen w-full"
+      className="h-screen w-full flex flex-col overflow-hidden"
       style={{ background: "#F2EFE6", fontFamily: "'IBM Plex Sans', sans-serif" }}
     >
       {/* Header */}
-      <div style={{ background: "#1F5C5C" }} className="px-5 pt-6 pb-5">
+      <div style={{ background: "#1F5C5C" }} className="px-5 pt-6 pb-5 shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p
@@ -325,7 +341,7 @@ export default function App() {
       ) : (
         <>
           {/* Tab bar */}
-          <div className="flex overflow-x-auto no-scrollbar border-b border-stone-200 bg-[#F2EFE6] sticky top-0 z-10 px-2">
+          <div className="flex overflow-x-auto no-scrollbar border-b border-stone-200 bg-[#F2EFE6] shrink-0 px-2">
             {TABS.map((t) => {
               const Icon = t.icon;
               const active = tab === t.id;
@@ -353,25 +369,27 @@ export default function App() {
             })}
           </div>
 
-          <div className="px-5 py-5 pb-16 max-w-xl mx-auto">
-            {tab === "resume" && (
-              <ResumeTab settings={settings} updateSettings={updateSettings} targets={targets} />
-            )}
-            {tab === "hebdo" && (
-              <HebdoTab weeks={weeks} weekly={weekly} updateWeekly={updateWeekly} chartData={chartData} targets={targets} startWeight={startWeight} />
-            )}
-            {tab === "quotidien" && (
-              <QuotidienTab
-                todayIso={todayIso}
-                targets={targets}
-                todayForm={todayForm}
-                saveTodayForm={saveTodayForm}
-                dailyLog={dailyLog}
-              />
-            )}
-            {tab === "repas" && <RepasTab targets={targets} />}
-            {tab === "activite" && <ActiviteTab currentWeek={wk} phase={phase} />}
-            {tab === "motivation" && <MotivationTab />}
+          <div className="flex-1 overflow-y-auto px-5 py-5 pb-16">
+            <div className="max-w-xl mx-auto">
+              {tab === "resume" && (
+                <ResumeTab settings={settings} updateSettings={updateSettings} targets={targets} />
+              )}
+              {tab === "hebdo" && (
+                <HebdoTab weeks={weeks} weekly={weekly} updateWeekly={updateWeekly} chartData={chartData} targets={targets} startWeight={startWeight} />
+              )}
+              {tab === "quotidien" && (
+                <QuotidienTab
+                  todayIso={todayIso}
+                  targets={targets}
+                  todayForm={todayForm}
+                  saveTodayForm={saveTodayForm}
+                  dailyLog={dailyLog}
+                />
+              )}
+              {tab === "repas" && <RepasTab targets={targets} />}
+              {tab === "activite" && <ActiviteTab currentWeek={wk} phase={phase} />}
+              {tab === "motivation" && <MotivationTab />}
+            </div>
           </div>
         </>
       )}
